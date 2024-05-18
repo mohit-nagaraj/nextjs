@@ -9,6 +9,7 @@ const Dashboard = async() => {
     const user=await getUser()
 
     if(!user || !user?.id){
+        //first time when the user logs in, the user object will be empty, thus sync user to db
         //add origin to the query string to redirect back to the dashboard after login
         redirect('/auth-callback?origin=dashbaord')
     }
