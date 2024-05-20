@@ -1,5 +1,7 @@
 //inorder to make this a client side component write "use Client" in the first line
 
+import DashComponent from "@/components/DashComponent";
+import { db } from "@/db";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
 
@@ -14,10 +16,16 @@ const Dashboard = async() => {
         redirect('/auth-callback?origin=dashbaord')
     }
 
+    const dbUser =await db.user.findFirst({
+        where:{
+            id:user.id
+        }
+    })
+
+    if(!dbUser) redirect('/auth-callback?origin=dashbaord')
+
     return (
-        <div>
-            <h1>{user?.email??'Loading...'}</h1>
-        </div>
+        <DashComponent />
     );
 }
 
