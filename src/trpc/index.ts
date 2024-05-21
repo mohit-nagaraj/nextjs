@@ -1,11 +1,12 @@
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
-import { publicProcedure, router } from "./trpc";
+import { privateProcedure, publicProcedure, router } from "./trpc";
 import { TRPCError } from "@trpc/server";
 import { db } from "@/db";
 //can export as we are using it only on server side
 // querys and mutations are used to create api endpoints
 // query is for get requests
 // mutation is for post,patch,delete requests
+// all the api endpoints are defined here
 export const appRouter = router({
   authCallback: publicProcedure.query(async () => {
     const { getUser } = getKindeServerSession();
@@ -30,6 +31,16 @@ export const appRouter = router({
     }
 
     return { success: true };
+  }),
+  //shud be private as we are getting user files
+  getUserFiles: privateProcedure.query(async ({ ctx }) => {
+    const { userId } = ctx
+
+    return await db.file.findMany({
+      where: {
+        userId,
+      },
+    })
   }),
 });
 // Export type router type signature,
