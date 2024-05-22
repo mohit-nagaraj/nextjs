@@ -7,6 +7,7 @@ import Providers from "@/components/Providers";
 
 //for react skeleton to work need add this css here
 import "react-loading-skeleton/dist/skeleton.css";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -33,6 +34,7 @@ export default function RootLayout({
         >
           <Navbar />
           {children}
+          <Toaster />
         </body>
       </Providers>
     </html>
