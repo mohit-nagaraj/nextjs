@@ -5,6 +5,9 @@ import { cn } from "@/lib/util";
 import Navbar from "@/components/Navbar";
 import Providers from "@/components/Providers";
 
+//for simple bar to fix height n prevent from scaling very big
+import "simplebar-react/dist/simplebar.min.css"
+
 //for react skeleton to work need add this css here
 import "react-loading-skeleton/dist/skeleton.css";
 import { Toaster } from "@/components/ui/toaster";

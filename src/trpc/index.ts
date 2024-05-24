@@ -43,6 +43,20 @@ export const appRouter = router({
       },
     });
   }),
+  getFileUploadStatus: privateProcedure
+    .input(z.object({ fileId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const file = await db.file.findFirst({
+        where: {
+          id: input.fileId,
+          userId: ctx.userId,
+        },
+      })
+      //we added as const to tell typescript that the value is fixed
+      if (!file) return { status: 'PENDING' as const}
+
+      return { status: file.uploadStatus }
+    }),
   //polling route
   getFile: privateProcedure
     .input(z.object({ key: z.string() }))
