@@ -3,6 +3,8 @@ import { privateProcedure, publicProcedure, router } from "./trpc";
 import { TRPCError } from "@trpc/server";
 import { db } from "@/db";
 import { z } from "zod";
+
+const INFINITE_QUERY_LIMIT = 10;
 //can export as we are using it only on server side
 // querys and mutations are used to create api endpoints
 // query is for get requests
@@ -43,6 +45,62 @@ export const appRouter = router({
       },
     });
   }),
+  //api endpoint to get all the messages of a file
+  getFileMessages: privateProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).nullish(),
+        cursor: z.string().nullish(),
+        fileId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const { userId } = ctx
+      const { fileId, cursor } = input
+      const limit = input.limit ?? INFINITE_QUERY_LIMIT
+      //again the typical check
+      const file = await db.file.findFirst({
+        where: {
+          id: fileId,
+          userId,
+        },
+      })
+
+      if (!file) throw new TRPCError({ code: 'NOT_FOUND' })
+      //get messages from db
+      const messages = await db.message.findMany({
+        // imp cuz as tracker to get the next set of messages (first point in it)
+        take: limit + 1,
+        where: {
+          fileId,
+        },
+        //order by latest first
+        //so tht it chronologically displays
+        orderBy: {
+          createdAt: 'desc',
+        },
+        //if cursor is present, get messages after that
+        cursor: cursor ? { id: cursor } : undefined,
+        //select only the required fields
+        select: {
+          id: true,
+          isUserMessage: true,
+          createdAt: true,
+          text: true,
+        },
+      })
+      //to determine the next cursor if there are more messages
+      let nextCursor: typeof cursor | undefined = undefined
+      if (messages.length > limit) {
+        const nextItem = messages.pop()
+        nextCursor = nextItem?.id
+      }
+
+      return {
+        messages,
+        nextCursor,
+      }
+    }),
   getFileUploadStatus: privateProcedure
     .input(z.object({ fileId: z.string() }))
     .query(async ({ input, ctx }) => {

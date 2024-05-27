@@ -19,6 +19,9 @@ export default withUt({
       },
     },
     extend: {
+      height: {
+        'inherit': 'inherit',
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

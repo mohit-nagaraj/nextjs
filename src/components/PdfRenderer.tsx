@@ -92,7 +92,7 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
   }
 
   return (
-    <div className='w-full bg-white rounded-md shadow flex flex-col items-center'>
+    <div className='w-full bg-white rounded-md shadow flex flex-col items-center h-[calc(100vh-3.5rem)]'>
       <div className='h-14 w-full border-b border-zinc-200 flex items-center justify-between px-2'>
         <div className='flex items-center gap-1.5'>
           <Button
@@ -196,7 +196,7 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
 
       <div className='flex-1 w-full max-h-screen overflow-x-auto'>
         <SimpleBar
-          
+          className='max-h-[calc(100vh-10rem)]'
           >
           <div ref={ref}>
             <Document
