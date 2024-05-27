@@ -60,19 +60,21 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
       }
     },
     onMutate: async ({ message }) => {
+      //save the current message to clear input
       backupMessage.current = message
       setMessage('')
 
-      // step 1
+      // step 1: cancel any ongoing queries
       await utils.getFileMessages.cancel()
 
-      // step 2
+      // step 2: get snapshot of previous messages
       const previousMessages =
         utils.getFileMessages.getInfiniteData()
 
-      // step 3
+      // step 3: optimistically insert new values
       utils.getFileMessages.setInfiniteData(
         { fileId, limit: INFINITE_QUERY_LIMIT },
+        //recieves the old data in the call back
         (old) => {
           if (!old) {
             return {
@@ -86,12 +88,14 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
           let latestPage = newPages[0]!
 
           latestPage.messages = [
+            //add the current message
             {
               createdAt: new Date().toISOString(),
               id: crypto.randomUUID(),
               text: message,
               isUserMessage: true,
             },
+            //add the previous messages
             ...latestPage.messages,
           ]
 
@@ -114,6 +118,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
       }
     },
     onSuccess: async (stream) => {
+      //get the response from ai n put it here
       setIsLoading(false)
 
       if (!stream) {
@@ -124,8 +129,9 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
           variant: 'destructive',
         })
       }
-
+      //get the reader
       const reader = stream.getReader()
+      //get the decoder
       const decoder = new TextDecoder()
       let done = false
 
@@ -136,8 +142,10 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
         const { value, done: doneReading } =
           await reader.read()
         done = doneReading
+        //chunk is how the ai sends the response
+        //decode the value
         const chunkValue = decoder.decode(value)
-
+        //append the chunk to the accumulated response
         accResponse += chunkValue
 
         // append chunk to the actual message
@@ -156,7 +164,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
             let updatedPages = old.pages.map((page) => {
               if (page === old.pages[0]) {
                 let updatedMessages
-
+                //if ai response is not created
                 if (!isAiResponseCreated) {
                   updatedMessages = [
                     {
@@ -180,7 +188,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
                     }
                   )
                 }
-
+                //return the updated page
                 return {
                   ...page,
                   messages: updatedMessages,
@@ -197,7 +205,9 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
     },
 
     onError: (_, __, context) => {
+      //reset the message in the input
       setMessage(backupMessage.current)
+      //update the latestest messages
       utils.getFileMessages.setData(
         { fileId },
         { messages: context?.previousMessages ?? [] }
