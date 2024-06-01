@@ -11,11 +11,11 @@ import { useToast } from "./ui/use-toast";
 import { trpc } from "@/app/_trpc/client";
 import { useRouter } from "next/navigation";
 
-const UploadDropzone = () => {
+const UploadDropzone = ({ isSubscribed }: { isSubscribed: boolean }) => {
   const router = useRouter();
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(100);
-  const { startUpload } = useUploadThing("PdfUploader");
+  const { startUpload } = useUploadThing(isSubscribed?"ProPdfUploader":"PdfUploader");
   const { toast } = useToast();
   const { mutate: startPolling } = trpc.getFile.useMutation({
     onSuccess: (file) => {
@@ -92,7 +92,7 @@ const UploadDropzone = () => {
                   <span className="font-semibold">Click to upload</span> or drag
                   and drop
                 </p>
-                <p className="text-xs text-zinc-500">PDF (up to 4MB)</p>
+                <p className="text-xs text-zinc-500">PDF (up to {isSubscribed?'16MB':'4MB'})</p>
               </div>
               {/* always better to use instead of && cuz it may lead to bugs */}
               {acceptedFiles && acceptedFiles[0] ? (
@@ -137,7 +137,11 @@ const UploadDropzone = () => {
   );
 };
 
-const UploadButton = () => {
+const UploadButton = ({
+  isSubscribed,
+}: {
+  isSubscribed: boolean
+}) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   return (
     <Dialog
@@ -155,7 +159,7 @@ const UploadButton = () => {
 
       {/* this is the content tht shud go inside dialog box else nothing will be shown */}
       <DialogContent>
-        <UploadDropzone />
+        <UploadDropzone isSubscribed={isSubscribed}/>
       </DialogContent>
     </Dialog>
   );

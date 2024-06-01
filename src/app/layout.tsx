@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { cn } from "@/lib/util";
+import { cn, constructMetadata } from "@/lib/util";
 import Navbar from "@/components/Navbar";
 import Providers from "@/components/Providers";
 
@@ -14,11 +14,7 @@ import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "QuillBot",
-  description:
-    "QuillBot is a state-of-the-art paraphrasing tool. It is the best article rewriter available, and can completely paraphrase an entire article for free. Simply input a sentence, and hit the 'Quill It' button. QuillBot will then rephrase the content while maintaining the original meaning.",
-};
+export const metadata=constructMetadata();
 
 export default function RootLayout({
   children,
